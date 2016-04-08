@@ -6,7 +6,8 @@
             {
                 width: '100%',
                 height: '500px',
-                border: '1px solid #000'
+                border: '1px solid #000',
+                background: '#FFF'
             },
             parameters = $.extend(defaultParameters, options),
             self = this;
@@ -20,7 +21,8 @@
         this.css({
             width: parameters.width,
             height: parameters.height,
-            border: parameters.border
+            border: parameters.border,
+            background: parameters.background
         });
 
         // SVG icons
@@ -65,7 +67,14 @@
             '%3E%0A%20%20%20%20%3Cpath%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22/%3E%0A%3C/svg%3E',
             circle: '%3Csvg%20fill%3D%22%23000000%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20width%3D%2224%22%20xmlns%3D%22http%3A//' +
             'www.w3.org/2000/svg%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22/%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12%2' +
-            '02C6.48%202%202%206.48%202%2012s4.48%2010%2010%2010%2010-4.48%2010-10S17.52%202%2012%202z%22/%3E%0A%3C/svg%3E'
+            '02C6.48%202%202%206.48%202%2012s4.48%2010%2010%2010%2010-4.48%2010-10S17.52%202%2012%202z%22/%3E%0A%3C/svg%3E',
+            eraser: '%3Csvg%20version%3D%221.1%22%20id%3D%22Layer_1%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20xmlns%3Axlink%3D%22http%3A//www.' +
+            'w3.org/1999/xlink%22%20x%3D%220px%22%20y%3D%220px%22%0A%09%20width%3D%2224px%22%20height%3D%2224px%22%20viewBox%3D%220%200%2024%2024%22%2' +
+            '0enable-background%3D%22new%200%200%2024%2024%22%20xml%3Aspace%3D%22preserve%22%3E%0A%3Cpath%20d%3D%22M18.98%2C5.91l-7.335-4.237c-0.974-0' +
+            '.562-2.33-0.2-2.891%2C0.776L0.283%2C17.122c-0.585%2C1.012-0.235%2C2.308%2C0.776%2C2.896%0A%09l4.489%2C2.575l6.15-0.025l8.06-13.765C20.342' +
+            '%2C7.792%2C19.994%2C6.494%2C18.98%2C5.91L18.98%2C5.91z%20M18.535%2C8.093l-3.925%2C6.706L6.092%2C9.881%0A%09l3.883-6.726c0.127-0.218%2C0.3' +
+            '62-0.354%2C0.613-0.354c0.124%2C0%2C0.243%2C0.03%2C0.352%2C0.094l7.336%2C4.236%0A%09C18.614%2C7.327%2C18.729%2C7.759%2C18.535%2C8.093z%20M' +
+            '24%2C21.156v1.412h-9.884v-1.412H24z%22/%3E%0A%3C/svg%3E%0A'
         };
 
         // Toolbar
@@ -129,6 +138,19 @@
             '<defs><path d="M0 0h24v24H0z" id="a"/></defs><clipPath id="b"><use overflow="visible" xlink:href="#a"/></clipPath>' +
             '<path clip-path="url(#b)" d="M3 17h18v-2H3v2zm0 3h18v-1H3v1zm0-7h18v-3H3v3zm0-9v4h18V4H3z"/></svg>' +
             '</i></a></li>' +
+                /* Eraser tool */
+            '<li id="eraser" title="Eraser tool"><a><i>' +
+            '<svg x="0px" y="0px" width="24px" height="24px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" inkscape:version="0.48.4 r9939"' +
+            'sodipodi:docname="eraser.svg"><metadata id="metadata9"><rdf:RDF><cc:Work rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/' +
+            'dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs id="defs7" /><sodipodi:namedview pagecolor="#FFFFFF"' +
+            ' bordercolor="#FFFFFF" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10"' +
+            'inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="1855" inkscape:window-height="1056" id="namedview5"' +
+            'showgrid="false" inkscape:zoom="9.8333333" inkscape:cx="12" inkscape:cy="12" inkscape:window-x="65" inkscape:window-y="24"' +
+            'inkscape:window-maximized="1" inkscape:current-layer="Layer_1" /><path d="M18.98,5.91l-7.335-4.237c-0.974-0.562-2.33-0.2-2.8' +
+            '91,0.776L0.283,17.122c-0.585,1.012-0.235,2.308,0.776,2.896  l4.489,2.575l6.15-0.025l8.06-13.765C20.342,7.792,19.994,6.494,18.' +
+            '98,5.91L18.98,5.91z M18.535,8.093l-3.925,6.706L6.092,9.881  l3.883-6.726c0.127-0.218,0.362-0.354,0.613-0.354c0.124,0,0.243,0.0' +
+            '3,0.352,0.094l7.336,4.236  C18.614,7.327,18.729,7.759,18.535,8.093z M24,21.156v1.412h-9.884v-1.412H24z" id="path3" style="fill:#ffffff" /></svg>' +
+            '</i></a></li>' +
             '</ul>' +
             '</div>' +
             '</nav>');
@@ -139,7 +161,7 @@
             weight = 2;
 
         $toolbarItems.on('click', function () {
-            if($(this).attr('id') !== 'weight'){
+            if ($(this).attr('id') !== 'weight') {
                 $toolbarItems.each(function () {
                     $(this).removeClass('active');
                 });
@@ -155,10 +177,10 @@
         // Weight tool style
         $('#my_paint-weight').css({position: 'absolute', left: $('#weight').offset().left, width: ($('#weight').width()) * 2, display: 'none'});
 
-        $('#weight').on('click', function(){
+        $('#weight').on('click', function () {
             var bar = $('#my_paint-weight');
 
-            if (bar.is(":visible")){
+            if (bar.is(":visible")) {
                 bar.hide();
             } else {
                 bar.show();
@@ -166,7 +188,7 @@
         });
 
         // Defines selected weight
-        $('#weightRange').on('change', function(){
+        $('#weightRange').on('change', function () {
             weight = $('#weightRange').val();
         });
 
@@ -203,10 +225,12 @@
 
             switch (selectedTool) {
                 case 'pen':
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.fillRect(pos.x, pos.y, weight, weight);
                     line = [];
                     break;
                 case 'line':
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.lineJoin = "round";
                     ctx.lineCap = "round";
                     line.push({x: pos.x, y: pos.y});
@@ -219,6 +243,7 @@
                     }
                     break;
                 case 'square':
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.lineCap = "square";
                     square.push({x: pos.x, y: pos.y});
                     if (square.length == 2) {
@@ -234,6 +259,7 @@
                     }
                     break;
                 case 'polygon':
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.lineJoin = "round";
                     ctx.lineCap = "round";
                     line.push({x: pos.x, y: pos.y});
@@ -246,6 +272,7 @@
                     }
                     break;
                 case 'circle':
+                    ctx.globalCompositeOperation = 'source-over';
                     var rayonX, rayonY, rayon;
                     circle.push({x: pos.x, y: pos.y});
                     if (circle.length == 2) {
@@ -262,6 +289,13 @@
                         circle = [];
                     }
                     break;
+                case 'eraser':
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.fillStyle = 'rgba(0,0,0,1)';
+                    ctx.strokeStyle = 'rgba(0,0,0,1)';
+                    ctx.fillRect(pos.x, pos.y, weight, weight);
+                    line = [];
+                    break;
             }
 
             $(this).mousemove(function (event) {
@@ -273,10 +307,21 @@
                     };
                     switch (selectedTool) {
                         case 'pen':
+                            ctx.globalCompositeOperation = 'source-over';
                             ctx.lineJoin = "round";
                             ctx.lineCap = "round";
                             ctx.lineTo(newPos.x, newPos.y);
                             ctx.strokeStyle = '#000';
+                            ctx.lineWidth = weight;
+                            ctx.stroke();
+                            break;
+                        case 'eraser':
+                            ctx.globalCompositeOperation = 'destination-out';
+                            ctx.fillStyle = 'rgba(0,0,0,1)';
+                            ctx.strokeStyle = 'rgba(0,0,0,1)';
+                            ctx.lineJoin = "round";
+                            ctx.lineCap = "round";
+                            ctx.lineTo(newPos.x, newPos.y);
                             ctx.lineWidth = weight;
                             ctx.stroke();
                             break;
