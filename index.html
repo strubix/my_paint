@@ -5,12 +5,25 @@
     <title>My paint</title>
     <link rel="stylesheet" type="text/css" href="bower_components/Materialize/dist/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
+<nav id="nav">
+    <div class="nav-wrapper blue">
+        <div class="container">
+            <a href="#" class="brand-logo">My_paint project</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li title="link to my github">
+                    <a href="https://github.com/tralaladidou">
+                        <i id="logo"><img src="github.svg"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 <div class="container">
     <div class="row">
-        <h1 class="center-align">My paint</h1>
-
         <!-- Canvas to apply plugin -->
         <canvas id="my_paint"></canvas>
     </div>

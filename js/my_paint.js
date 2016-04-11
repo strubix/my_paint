@@ -7,7 +7,8 @@
                 width: '100%',
                 height: '500px',
                 border: '1px solid #000',
-                background: '#FFF'
+                background: '#FFF',
+                toolbar_color: 'blue'
             },
             parameters = $.extend(defaultParameters, options),
             self = this;
@@ -22,7 +23,8 @@
             width: parameters.width,
             height: parameters.height,
             border: parameters.border,
-            background: parameters.background
+            background: parameters.background,
+            toolbar_color: parameters.toolbar_color
         });
 
         // SVG icons
@@ -79,7 +81,7 @@
 
         // Toolbar
         this.before('<nav id="my_paint-navbar">' +
-            '<div class="nav-wrapper blue">' +
+            '<div class="nav-wrapper ' + parameters.toolbar_color + '">' +
             '<ul>' +
                 /* Pen tool */
             '<li class="active" id="pen" title="Pen tool"><a><i><svg height="24px" version="1.1" viewBox="0 0 24 24" width="24px" ' +
@@ -124,7 +126,8 @@
             '</i></a>' +
             '</li>' +
                 /* Circle tool */
-            '<li id="circle" title="Circle tool">' +
+            '<li id="circle" titl' +
+            'e="Circle tool">' +
             '<a><i>' +
             '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">' +
             '<path d="M0 0h24v24H0z" fill="none"/>' +
@@ -158,6 +161,24 @@
             '<path d="M17.75 7L14 3.25l-10 10V17h3.75l10-10zm2.96-2.96c.39-.39.39-1.02 0-1.41L18.37.29c-.39-.39-1.02-.39-1.41 0L15 2.25 18.75 6l1.96-1.96z"/>' +
             '<path d="M0 0h24v24H0z" fill="none"/><path d="M0 20h24v4H0z" fill-opacity=".36"/></svg>' +
             '</i></a></li>' +
+                /* Clear canvas */
+            '<li id="clear-canvas" title="Clear"><a><i>' +
+            '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31' +
+            ' 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>' +
+            '<path d="M0 0h24v24H0z" fill="none"/></svg>' +
+            '</i></a></li>' +
+                /* Save tool */
+            '<li id="paint-save" title="Save as ..."><a><i>' +
+            '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7' +
+            '-7zM5 18v2h14v-2H5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>' +
+            '</i></a></li>' +
+                /* Upload tool */
+            '<li id="paint-upload" title="Upload image ..."><a><i>' +
+            '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/>' +
+            '<path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>' +
+            '<input type="file" id="paint-file">' +
+            '</i></a></li>' +
             '</ul>' +
             '</div>' +
             '</nav>');
@@ -169,7 +190,11 @@
             color = '#000';
 
         $toolbarItems.on('click', function () {
-            if ($(this).attr('id') !== 'weight' && $(this).attr('id') !== 'color') {
+            if ($(this).attr('id') !== 'weight'
+                && $(this).attr('id') !== 'color'
+                && $(this).attr('id') !== 'paint-save'
+                && $(this).attr('id') !== 'paint-upload'
+                && $(this).attr('id') !== 'clear-canvas') {
                 $toolbarItems.each(function () {
                     $(this).removeClass('active');
                 });
@@ -208,11 +233,11 @@
         });
 
         // Color Picker
-        $('#paint-colorPicker').css({ position: 'absolute', left: '-9999px', top: '-9999px'});
-        $('#color').on('click', function(){
+        $('#paint-colorPicker').css({position: 'absolute', left: '-9999px', top: '-9999px'});
+        $('#color').on('click', function () {
             $("#paint-colorPicker")[0].click();
         });
-        $('#paint-colorPicker').on('change', function(){
+        $('#paint-colorPicker').on('change', function () {
             color = this.value;
         });
 
@@ -222,6 +247,38 @@
 
         canvas.width = $(this).width();
         canvas.height = $(this).height();
+
+        // File upload
+        $('#paint-file').css({display: 'none'});
+        $('#paint-upload').on('click', function () {
+            $("#paint-file")[0].click();
+        });
+        $('#paint-file').on('change', function (e) {
+            if ((/\.(png|jpeg|jpg|gif)$/i).test(e.target.files[0].name)) {
+                var image = new Image;
+                image.src = URL.createObjectURL(e.target.files[0]);
+                image.onload = function () {
+                    if(this.width > canvas.width){
+                        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    } else {
+                        ctx.drawImage(image, canvas.width / 2 - image.width / 2, canvas.height / 2 - image.height / 2)
+                    }
+                };
+            } else {
+                alert('Please upload an image file');
+            }
+        });
+
+        // Clear canvas
+        $('#clear-canvas').on('click', function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // Save tool
+        $('#paint-save').on('click', function () {
+            var image = canvas.toDataURL("image/png", 1.0).replace("image/png", "image/octet-stream");
+            window.location.href = image;
+        });
 
         // Tools arrays
         var line = [],
@@ -324,7 +381,6 @@
 
             $(this).mousemove(function (event) {
                 if (mouseDown == true) {
-
                     var newPos = {
                         x: (event.pageX - $(this).offset().left) * (canvas.width / width),
                         y: (event.pageY - $(this).offset().top) * (canvas.height / height)
@@ -355,7 +411,6 @@
 
             $(this).mouseup(function () {
                 mouseDown = false;
-
                 switch (selectedTool) {
                     case 'pen':
                         ctx.closePath();
