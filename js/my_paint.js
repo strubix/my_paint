@@ -151,6 +151,13 @@
             '98,5.91L18.98,5.91z M18.535,8.093l-3.925,6.706L6.092,9.881  l3.883-6.726c0.127-0.218,0.362-0.354,0.613-0.354c0.124,0,0.243,0.0' +
             '3,0.352,0.094l7.336,4.236  C18.614,7.327,18.729,7.759,18.535,8.093z M24,21.156v1.412h-9.884v-1.412H24z" id="path3" style="fill:#ffffff" /></svg>' +
             '</i></a></li>' +
+                /* Color tool */
+            '<li id="color" title="Color tool"><a><i>' +
+            '<input type="color" id="paint-colorPicker" display="none">' +
+            '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M17.75 7L14 3.25l-10 10V17h3.75l10-10zm2.96-2.96c.39-.39.39-1.02 0-1.41L18.37.29c-.39-.39-1.02-.39-1.41 0L15 2.25 18.75 6l1.96-1.96z"/>' +
+            '<path d="M0 0h24v24H0z" fill="none"/><path d="M0 20h24v4H0z" fill-opacity=".36"/></svg>' +
+            '</i></a></li>' +
             '</ul>' +
             '</div>' +
             '</nav>');
@@ -158,10 +165,11 @@
         // Toolbar functions
         var $toolbarItems = $('#my_paint-navbar ul li'),
             selectedTool = 'pen',
-            weight = 2;
+            weight = 2,
+            color = '#000';
 
         $toolbarItems.on('click', function () {
-            if ($(this).attr('id') !== 'weight') {
+            if ($(this).attr('id') !== 'weight' && $(this).attr('id') !== 'color') {
                 $toolbarItems.each(function () {
                     $(this).removeClass('active');
                 });
@@ -197,6 +205,15 @@
             $(this).css({
                 cursor: 'url(data:image/svg+xml,' + icons[selectedTool] + ') 2 20, auto'
             })
+        });
+
+        // Color Picker
+        $('#paint-colorPicker').css({ position: 'absolute', left: '-9999px', top: '-9999px'});
+        $('#color').on('click', function(){
+            $("#paint-colorPicker")[0].click();
+        });
+        $('#paint-colorPicker').on('change', function(){
+            color = this.value;
         });
 
         // Defines canvas resolution
@@ -238,6 +255,7 @@
                         ctx.moveTo(line[0].x, line[0].y);
                         ctx.lineTo(line[1].x, line[1].y);
                         ctx.lineWidth = weight;
+                        ctx.strokeStyle = color;
                         ctx.stroke();
                         line = [];
                     }
@@ -253,7 +271,10 @@
                         ctx.lineTo(square[0].x, square[1].y);
                         ctx.lineTo(square[0].x, square[0].y);
                         ctx.lineWidth = weight;
+                        ctx.fillStyle = color;
+                        ctx.strokeStyle = color;
                         ctx.stroke();
+                        ctx.fill();
                         ctx.closePath();
                         square = [];
                     }
@@ -284,8 +305,11 @@
                             rayon = rayonY;
                         }
                         ctx.lineWidth = weight;
+                        ctx.strokeStyle = color;
+                        ctx.fillStyle = color;
                         ctx.arc(circle[0].x, circle[0].y, rayon, 0, Math.PI * 2, false);
                         ctx.stroke();
+                        ctx.fill();
                         circle = [];
                     }
                     break;
@@ -311,7 +335,7 @@
                             ctx.lineJoin = "round";
                             ctx.lineCap = "round";
                             ctx.lineTo(newPos.x, newPos.y);
-                            ctx.strokeStyle = '#000';
+                            ctx.strokeStyle = color;
                             ctx.lineWidth = weight;
                             ctx.stroke();
                             break;
