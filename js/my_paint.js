@@ -258,8 +258,19 @@
                 var image = new Image;
                 image.src = URL.createObjectURL(e.target.files[0]);
                 image.onload = function () {
-                    if(this.width > canvas.width){
-                        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    if (image.height > canvas.height || image.width > canvas.width) {
+                        if(image.height / 2 > canvas.height || image.width / 2 > canvas.width){
+                            var imageDrawn = false;
+                            for (var i = 2 ; i < 10 ; i++){
+                                if(image.height / i <= canvas.height && image.width / i <= canvas.width){
+                                    imageDrawn = true;
+                                    return ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, image.width / i, image.height / i);
+                                }
+                            }
+                            if( imageDrawn == false){
+                                alert('Your image is too big !');
+                            }
+                        }
                     } else {
                         ctx.drawImage(image, canvas.width / 2 - image.width / 2, canvas.height / 2 - image.height / 2)
                     }

@@ -22,7 +22,7 @@ my_paint.js plugin provides a nice paint like element with a tiny toolbar to you
 * Color tool
 * Save tool
 * Upload tool
-* Toasty
+* Toastylo
 
 The toolbar has its own svg icons ready.
 

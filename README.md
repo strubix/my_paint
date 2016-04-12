@@ -20,9 +20,9 @@ my_paint.js plugin provides a nice paint like element with a tiny toolbar to you
 * Weight tool
 * Eraser tool
 * Color tool
+* Refresh tool
 * Save tool
 * Upload tool
-* Toastylo
 
 The toolbar has its own svg icons ready.
 
