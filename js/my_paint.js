@@ -24,7 +24,11 @@
             height: parameters.height,
             border: parameters.border,
             background: parameters.background,
-            toolbar_color: parameters.toolbar_color
+            toolbar_color: parameters.toolbar_color,
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            'z-index': 0
         });
 
         // SVG icons
@@ -179,15 +183,29 @@
             '<path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>' +
             '<input type="file" id="paint-file">' +
             '</i></a></li>' +
+                /* Symmetry tool */
+            '<li id="paint-symmetry" title="Symmetry tool"><a><i>' +
+            '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/>' +
+            '<path d="M15 21h2v-2h-2v2zm4-12h2V7h-2v2zM3 5v14c0 1.1.9 2 2 2h4v-2H5V5h4V3H5c-1.1 0-2 .9-2 2zm16-2v2h2c0-1.1-.9-2-2-2zm-8 ' +
+            '20h2V1h-2v22zm8-6h2v-2h-2v2zM15 5h2V3h-2v2zm4 8h2v-2h-2v2zm0 8c1.1 0 2-.9 2-2h-2v2z"/></svg>' +
+            '</i></a></li>' +
             '</ul>' +
             '</div>' +
             '</nav>');
+
+        // Paint container
+        this.wrap('<div id="paint-container"></div>');
+
+        $('#paint-container').css({
+            position: 'relative'
+        });
 
         // Toolbar functions
         var $toolbarItems = $('#my_paint-navbar ul li'),
             selectedTool = 'pen',
             weight = 2,
-            color = '#000';
+            color = '#000',
+            layerIndex = 0;
 
         $toolbarItems.on('click', function () {
             if ($(this).attr('id') !== 'weight'
@@ -208,11 +226,16 @@
         $('#my_paint-navbar').after('<p class="range-field" id="my_paint-weight"><input type="range" id="weightRange" value="2" min="1" max="50" /></p>');
 
         // Weight tool style
-        $('#my_paint-weight').css({position: 'absolute', left: $('#weight').offset().left, width: ($('#weight').width()) * 2, display: 'none'});
+        $('#my_paint-weight').css({
+            position: 'absolute',
+            left: $('#weight').offset().left,
+            width: ($('#weight').width()) * 2,
+            display: 'none',
+            'z-index': 10000
+        });
 
         $('#weight').on('click', function () {
             var bar = $('#my_paint-weight');
-
             if (bar.is(":visible")) {
                 bar.hide();
             } else {
@@ -259,15 +282,15 @@
                 image.src = URL.createObjectURL(e.target.files[0]);
                 image.onload = function () {
                     if (image.height > canvas.height || image.width > canvas.width) {
-                        if(image.height / 2 > canvas.height || image.width / 2 > canvas.width){
+                        if (image.height / 2 > canvas.height || image.width / 2 > canvas.width) {
                             var imageDrawn = false;
-                            for (var i = 2 ; i < 10 ; i++){
-                                if(image.height / i <= canvas.height && image.width / i <= canvas.width){
+                            for (var i = 2; i < 10; i++) {
+                                if (image.height / i <= canvas.height && image.width / i <= canvas.width) {
                                     imageDrawn = true;
                                     return ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, image.width / i, image.height / i);
                                 }
                             }
-                            if( imageDrawn == false){
+                            if (imageDrawn == false) {
                                 alert('Your image is too big !');
                             }
                         }
@@ -290,6 +313,90 @@
             var image = canvas.toDataURL("image/png", 1.0).replace("image/png", "image/octet-stream");
             window.location.href = image;
         });
+
+        // Canvas object
+        var layers = [];
+        layers.push(this.get(0));
+
+        function CanvasLayer() {
+            this.create = function () {
+                // increments z-index
+                layerIndex++;
+                self.after('<canvas id="layer' + layerIndex + '"></canvas>');
+                $('#layer' + layerIndex).css({
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    'z-index': layerIndex,
+                    width: canvas.width,
+                    height: canvas.height
+                });
+                layers.push($('#layer' + layerIndex).get(0));
+            };
+            this.create();
+        }
+
+        // Layers toolbar
+        this.after('<div id="paint-layer-buttons">' +
+            '<a class="btn-floating btn-large waves-effect waves-light red" id="base" title="Base layer"><i class="material-icons">' +
+            '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M0 0h24v24H0z" fill="none"/>' +
+            '<path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/>' +
+            '</svg></i></a>' +
+            '<a class="btn-floating btn-large waves-effect waves-light red" id="paint-add-layer" title="Add layer"><i class="material-icons">add</i></a>' +
+            '</div>');
+        $('#paint-layer-buttons').css({
+            position: 'absolute',
+            top: canvas.height + 6
+        });
+        $('#paint-layer-buttons a').css({
+            'margin-right': '10px'
+        });
+        function getLayerDivWidth() {
+            return ($('#paint-layer-buttons').outerWidth());
+        }
+
+        $('#paint-layer-buttons').css({
+            left: (canvas.width / 2) - (getLayerDivWidth() / 2)
+        });
+
+        $('#paint-add-layer').on('click', function () {
+            new CanvasLayer();
+        });
+        
+        // #Symmetry tool
+        /*var clickSymetry = 0;
+         $('#paint-symmetry').on('click', function () {
+         if (clickSymetry == 0) {
+         self.after('<canvas id="axis_vert"></canvas>');
+         $('#axis_vert').css({
+         position: 'absolute',
+         top: 0,
+         left: 0,
+         'z-index': 10,
+         width: canvas.width,
+         height: canvas.height
+         });
+
+         var co = $('#axis_vert').get(0);
+         var symetry = co.getContext("2d");
+
+         symetry.moveTo(canvas.width / 2, 0);
+         symetry.lineTo(canvas.width / 2, canvas.height);
+         symetry.lineWidth = weight;
+         symetry.strokeStyle = '#000';
+         symetry.stroke();
+         clickSymetry = 1;
+         } else {
+         symetry.moveTo(0, canvas.height / 2);
+         symetry.lineTo(canvas.width, canvas.height / 2);
+         symetry.lineWidth = weight;
+         symetry.strokeStyle = '#000';
+         symetry.stroke();
+         clickSymetry = 0;
+         }
+         });*/
+
 
         // Tools arrays
         var line = [],
