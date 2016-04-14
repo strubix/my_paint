@@ -207,6 +207,9 @@
             color = '#000',
             layerIndex = 0;
 
+        var firstCanvas = $('canvas').first();
+
+
         $toolbarItems.on('click', function () {
             if ($(this).attr('id') !== 'weight'
                 && $(this).attr('id') !== 'color'
@@ -249,7 +252,7 @@
         });
 
         // Cursor style
-        this.hover(function () {
+        $('canvas').hover(function () {
             $(this).css({
                 cursor: 'url(data:image/svg+xml,' + icons[selectedTool] + ') 2 20, auto'
             })
@@ -264,8 +267,13 @@
             color = this.value;
         });
 
+        // Layer Variables
+        var layers = [];
+        layers.push(this.get(0));
+        var currentLayer = layers[0];
+
         // Defines canvas resolution
-        var canvas = this.get(0);
+        var canvas = currentLayer;
         var ctx = canvas.getContext("2d");
 
         canvas.width = $(this).width();
@@ -314,44 +322,50 @@
             window.location.href = image;
         });
 
-        // Canvas object
-        var layers = [];
-        layers.push(this.get(0));
-
+        // CanvasLayer object
         function CanvasLayer() {
             this.create = function () {
                 // increments z-index
                 layerIndex++;
-                self.after('<canvas id="layer' + layerIndex + '"></canvas>');
+                $('canvas').last().after('<canvas id="layer' + layerIndex + '"></canvas>');
                 $('#layer' + layerIndex).css({
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     'z-index': layerIndex,
-                    width: canvas.width,
-                    height: canvas.height
+                    width: firstCanvas.width(),
+                    height: firstCanvas.height()
                 });
+                this.width = firstCanvas.width;
+                this.height = firstCanvas.height;
                 layers.push($('#layer' + layerIndex).get(0));
+                // Cursor style
+                $('canvas').hover(function () {
+                    $(this).css({
+                        cursor: 'url(data:image/svg+xml,' + icons[selectedTool] + ') 2 20, auto'
+                    })
+                });
             };
             this.create();
         }
 
         // Layers toolbar
         this.after('<div id="paint-layer-buttons">' +
-            '<a class="btn-floating btn-large waves-effect waves-light red" id="base" title="Base layer"><i class="material-icons">' +
-            '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">' +
-            '<path d="M0 0h24v24H0z" fill="none"/>' +
-            '<path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/>' +
-            '</svg></i></a>' +
-            '<a class="btn-floating btn-large waves-effect waves-light red" id="paint-add-layer" title="Add layer"><i class="material-icons">add</i></a>' +
-            '</div>');
+            '<a class="btn-floating btn-large waves-effect waves-light red paint-layer-button amber" id="base" title="Base layer"><i class="material-icons">' +
+            '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/>' +
+            '<path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg></i></a>' +
+            '<a class="btn-floating btn-large waves-effect waves-light red" id="paint-add-layer" title="Add layer"><i class="material-icons">add</i></a></div>');
+
         $('#paint-layer-buttons').css({
             position: 'absolute',
             top: canvas.height + 6
         });
-        $('#paint-layer-buttons a').css({
+
+        $('.paint-layer-button').css({
             'margin-right': '10px'
         });
+
+        // Cet Layers toolbar width
         function getLayerDivWidth() {
             return ($('#paint-layer-buttons').outerWidth());
         }
@@ -360,10 +374,52 @@
             left: (canvas.width / 2) - (getLayerDivWidth() / 2)
         });
 
+        // Add Layer
         $('#paint-add-layer').on('click', function () {
-            new CanvasLayer();
+            if(layerIndex < 8) {
+                console.log(firstCanvas.width);
+                console.log(firstCanvas.height);
+                new CanvasLayer();
+                currentLayer = layers[layers.length - 1];
+                $('#paint-add-layer').before('<a class="btn-floating btn-large waves-effect waves-light red paint-layer-button"' +
+                    ' id="layer' + layerIndex + '" title="layer' + layerIndex + '"><i class="material-icons">' +
+                    '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/>' +
+                    '<path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg></i></a>');
+                $('#laya').css({
+                    'margin-right': '10px'
+                });
+
+                $('.paint-layer-button').css({
+                    'margin-right': '10px'
+                });
+
+                $('#paint-layer-buttons').css({
+                    left: (canvas.width / 2) - (getLayerDivWidth() / 2)
+                });
+
+                setActiveLayer('#layer' + layerIndex);
+
+                $('.paint-layer-button').on('click', function(){
+                    var button = $(this).attr('id');
+                    setActiveLayer('#' + button);
+                });
+                canvas = layers[layerIndex];
+                ctx = canvas.getContext("2d");
+                draw($('#layer' + layerIndex));
+                $('canvas').width = $(this).width();
+                $('canvas').height = $(this).height();
+            } else {
+                alert('Too many layers !');
+            }
         });
-        
+
+
+        // Adds color to set the active layer on button
+        function setActiveLayer($id){
+            $('#paint-layer-buttons').find('.amber').removeClass('amber');
+            $('#paint-layer-buttons').find($id).addClass('amber');
+        }
+
         // #Symmetry tool
         /*var clickSymetry = 0;
          $('#paint-symmetry').on('click', function () {
@@ -398,143 +454,146 @@
          });*/
 
 
-        // Tools arrays
-        var line = [],
-            square = [],
-            circle = [];
+        draw(this);
+        function draw($id) {
+            // Tools arrays
+            var line = [],
+                square = [],
+                circle = [];
 
-        this.mousedown(function (event) {
-            var width = $(this).width(),
-                height = $(this).height(),
-                mouseDown = true;
+            $id.mousedown(function (event) {
+                var width = $(this).width(),
+                    height = $(this).height(),
+                    mouseDown = true;
 
-            var pos = {
-                x: (event.pageX - $(this).offset().left) * (canvas.width / width),
-                y: (event.pageY - $(this).offset().top) * (canvas.height / height)
-            };
+                var pos = {
+                    x: (event.pageX - $(this).offset().left) * (canvas.width / width),
+                    y: (event.pageY - $(this).offset().top) * (canvas.height / height)
+                };
 
-            ctx.beginPath();
+                ctx.beginPath();
 
-            switch (selectedTool) {
-                case 'pen':
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.fillRect(pos.x, pos.y, weight, weight);
-                    line = [];
-                    break;
-                case 'line':
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.lineJoin = "round";
-                    ctx.lineCap = "round";
-                    line.push({x: pos.x, y: pos.y});
-                    if (line.length == 2) {
-                        ctx.moveTo(line[0].x, line[0].y);
-                        ctx.lineTo(line[1].x, line[1].y);
-                        ctx.lineWidth = weight;
-                        ctx.strokeStyle = color;
-                        ctx.stroke();
-                        line = [];
-                    }
-                    break;
-                case 'square':
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.lineCap = "square";
-                    square.push({x: pos.x, y: pos.y});
-                    if (square.length == 2) {
-                        ctx.moveTo(square[0].x, square[0].y);
-                        ctx.lineTo(square[1].x, square[0].y);
-                        ctx.lineTo(square[1].x, square[1].y);
-                        ctx.lineTo(square[0].x, square[1].y);
-                        ctx.lineTo(square[0].x, square[0].y);
-                        ctx.lineWidth = weight;
-                        ctx.fillStyle = color;
-                        ctx.strokeStyle = color;
-                        ctx.stroke();
-                        ctx.fill();
-                        ctx.closePath();
-                        square = [];
-                    }
-                    break;
-                case 'polygon':
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.lineJoin = "round";
-                    ctx.lineCap = "round";
-                    line.push({x: pos.x, y: pos.y});
-                    if (line.length == 2) {
-                        ctx.moveTo(line[0].x, line[0].y);
-                        ctx.lineTo(line[1].x, line[1].y);
-                        ctx.lineWidth = weight;
-                        ctx.stroke();
-                        line = [{x: pos.x, y: pos.y}];
-                    }
-                    break;
-                case 'circle':
-                    ctx.globalCompositeOperation = 'source-over';
-                    var rayonX, rayonY, rayon;
-                    circle.push({x: pos.x, y: pos.y});
-                    if (circle.length == 2) {
-                        rayonX = Math.abs(circle[0].x - circle[1].x);
-                        rayonY = Math.abs(circle[0].y - circle[1].y);
-                        if (rayonX > rayonY) {
-                            rayon = rayonX;
-                        } else {
-                            rayon = rayonY;
-                        }
-                        ctx.lineWidth = weight;
-                        ctx.strokeStyle = color;
-                        ctx.fillStyle = color;
-                        ctx.arc(circle[0].x, circle[0].y, rayon, 0, Math.PI * 2, false);
-                        ctx.stroke();
-                        ctx.fill();
-                        circle = [];
-                    }
-                    break;
-                case 'eraser':
-                    ctx.globalCompositeOperation = 'destination-out';
-                    ctx.fillStyle = 'rgba(0,0,0,1)';
-                    ctx.strokeStyle = 'rgba(0,0,0,1)';
-                    ctx.fillRect(pos.x, pos.y, weight, weight);
-                    line = [];
-                    break;
-            }
-
-            $(this).mousemove(function (event) {
-                if (mouseDown == true) {
-                    var newPos = {
-                        x: (event.pageX - $(this).offset().left) * (canvas.width / width),
-                        y: (event.pageY - $(this).offset().top) * (canvas.height / height)
-                    };
-                    switch (selectedTool) {
-                        case 'pen':
-                            ctx.globalCompositeOperation = 'source-over';
-                            ctx.lineJoin = "round";
-                            ctx.lineCap = "round";
-                            ctx.lineTo(newPos.x, newPos.y);
-                            ctx.strokeStyle = color;
-                            ctx.lineWidth = weight;
-                            ctx.stroke();
-                            break;
-                        case 'eraser':
-                            ctx.globalCompositeOperation = 'destination-out';
-                            ctx.fillStyle = 'rgba(0,0,0,1)';
-                            ctx.strokeStyle = 'rgba(0,0,0,1)';
-                            ctx.lineJoin = "round";
-                            ctx.lineCap = "round";
-                            ctx.lineTo(newPos.x, newPos.y);
-                            ctx.lineWidth = weight;
-                            ctx.stroke();
-                            break;
-                    }
-                }
-            });
-
-            $(this).mouseup(function () {
-                mouseDown = false;
                 switch (selectedTool) {
                     case 'pen':
-                        ctx.closePath();
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.fillRect(pos.x, pos.y, weight, weight);
+                        line = [];
+                        break;
+                    case 'line':
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.lineJoin = "round";
+                        ctx.lineCap = "round";
+                        line.push({x: pos.x, y: pos.y});
+                        if (line.length == 2) {
+                            ctx.moveTo(line[0].x, line[0].y);
+                            ctx.lineTo(line[1].x, line[1].y);
+                            ctx.lineWidth = weight;
+                            ctx.strokeStyle = color;
+                            ctx.stroke();
+                            line = [];
+                        }
+                        break;
+                    case 'square':
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.lineCap = "square";
+                        square.push({x: pos.x, y: pos.y});
+                        if (square.length == 2) {
+                            ctx.moveTo(square[0].x, square[0].y);
+                            ctx.lineTo(square[1].x, square[0].y);
+                            ctx.lineTo(square[1].x, square[1].y);
+                            ctx.lineTo(square[0].x, square[1].y);
+                            ctx.lineTo(square[0].x, square[0].y);
+                            ctx.lineWidth = weight;
+                            ctx.fillStyle = color;
+                            ctx.strokeStyle = color;
+                            ctx.stroke();
+                            ctx.fill();
+                            ctx.closePath();
+                            square = [];
+                        }
+                        break;
+                    case 'polygon':
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.lineJoin = "round";
+                        ctx.lineCap = "round";
+                        line.push({x: pos.x, y: pos.y});
+                        if (line.length == 2) {
+                            ctx.moveTo(line[0].x, line[0].y);
+                            ctx.lineTo(line[1].x, line[1].y);
+                            ctx.lineWidth = weight;
+                            ctx.stroke();
+                            line = [{x: pos.x, y: pos.y}];
+                        }
+                        break;
+                    case 'circle':
+                        ctx.globalCompositeOperation = 'source-over';
+                        var rayonX, rayonY, rayon;
+                        circle.push({x: pos.x, y: pos.y});
+                        if (circle.length == 2) {
+                            rayonX = Math.abs(circle[0].x - circle[1].x);
+                            rayonY = Math.abs(circle[0].y - circle[1].y);
+                            if (rayonX > rayonY) {
+                                rayon = rayonX;
+                            } else {
+                                rayon = rayonY;
+                            }
+                            ctx.lineWidth = weight;
+                            ctx.strokeStyle = color;
+                            ctx.fillStyle = color;
+                            ctx.arc(circle[0].x, circle[0].y, rayon, 0, Math.PI * 2, false);
+                            ctx.stroke();
+                            ctx.fill();
+                            circle = [];
+                        }
+                        break;
+                    case 'eraser':
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.fillStyle = 'rgba(0,0,0,1)';
+                        ctx.strokeStyle = 'rgba(0,0,0,1)';
+                        ctx.fillRect(pos.x, pos.y, weight, weight);
+                        line = [];
                         break;
                 }
-            })
-        });
+
+                $(this).mousemove(function (event) {
+                    if (mouseDown == true) {
+                        var newPos = {
+                            x: (event.pageX - $(this).offset().left) * (canvas.width / width),
+                            y: (event.pageY - $(this).offset().top) * (canvas.height / height)
+                        };
+                        switch (selectedTool) {
+                            case 'pen':
+                                ctx.globalCompositeOperation = 'source-over';
+                                ctx.lineJoin = "round";
+                                ctx.lineCap = "round";
+                                ctx.lineTo(newPos.x, newPos.y);
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = weight;
+                                ctx.stroke();
+                                break;
+                            case 'eraser':
+                                ctx.globalCompositeOperation = 'destination-out';
+                                ctx.fillStyle = 'rgba(0,0,0,1)';
+                                ctx.strokeStyle = 'rgba(0,0,0,1)';
+                                ctx.lineJoin = "round";
+                                ctx.lineCap = "round";
+                                ctx.lineTo(newPos.x, newPos.y);
+                                ctx.lineWidth = weight;
+                                ctx.stroke();
+                                break;
+                        }
+                    }
+                });
+
+                $(this).mouseup(function () {
+                    mouseDown = false;
+                    switch (selectedTool) {
+                        case 'pen':
+                            ctx.closePath();
+                            break;
+                    }
+                })
+            });
+        }
     }
 })(jQuery);
