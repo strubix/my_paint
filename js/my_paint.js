@@ -375,7 +375,7 @@
 
         // Add Layer
         $('#paint-add-layer').on('click', function () {
-            if(layerIndex < 8) {
+            if (layerIndex < 8) {
                 new CanvasLayer();
                 currentLayer = layers[layers.length - 1];
                 $('#paint-add-layer').before('<a class="btn-floating btn-large waves-effect waves-light red paint-layer-button"' +
@@ -393,7 +393,7 @@
 
                 setActiveLayer('#layer' + layerIndex);
 
-                $('.paint-layer-button').on('click', function(){
+                $('.paint-layer-button').on('click', function () {
                     var button = $(this).attr('id');
                     setActiveLayer('#' + button);
 
@@ -415,43 +415,64 @@
         });
 
         // Adds color to set the active layer on button
-        function setActiveLayer($id){
+        function setActiveLayer($id) {
             $('#paint-layer-buttons').find('.amber').removeClass('amber');
             $('#paint-layer-buttons').find($id).addClass('amber');
         }
 
         // #Symmetry tool
-        /*var clickSymetry = 0;
-         $('#paint-symmetry').on('click', function () {
-         if (clickSymetry == 0) {
-         self.after('<canvas id="axis_vert"></canvas>');
-         $('#axis_vert').css({
-         position: 'absolute',
-         top: 0,
-         left: 0,
-         'z-index': 10,
-         width: canvas.width,
-         height: canvas.height
-         });
+        var clickSymetry = 0;
 
-         var co = $('#axis_vert').get(0);
-         var symetry = co.getContext("2d");
+        $('#paint-symmetry').on('click', function () {
+            if (clickSymetry % 2 == 0) {
 
-         symetry.moveTo(canvas.width / 2, 0);
-         symetry.lineTo(canvas.width / 2, canvas.height);
-         symetry.lineWidth = weight;
-         symetry.strokeStyle = '#000';
-         symetry.stroke();
-         clickSymetry = 1;
-         } else {
-         symetry.moveTo(0, canvas.height / 2);
-         symetry.lineTo(canvas.width, canvas.height / 2);
-         symetry.lineWidth = weight;
-         symetry.strokeStyle = '#000';
-         symetry.stroke();
-         clickSymetry = 0;
-         }
-         });*/
+                if($('#vertical').length < 1) {
+                    var tmpLayerIndex = layerIndex;
+                    layerIndex = 999;
+                    var vertical = new CanvasLayer();
+                    $('#layer' + layerIndex).attr('id', 'vertical');
+                    layerIndex = tmpLayerIndex;
+
+                    var canvas = $('#vertical').get(0);
+                    canvas.width = firstCanvas.width();
+                    canvas.height = firstCanvas.height();
+                    var ctx = canvas.getContext("2d");
+
+                    ctx.moveTo(canvas.width / 2, 0);
+                    ctx.lineTo(canvas.width / 2, canvas.height);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#000';
+                    ctx.stroke();
+                } else {
+                    $('#vertical').show();
+                    $('#horizontal').hide();
+                }
+            } else {
+                if($('#horizontal').length < 1) {
+                    $('#vertical').hide();
+                    tmpLayerIndex = layerIndex;
+                    layerIndex = 999;
+                    var horizontal = new CanvasLayer();
+                    $('#layer' + layerIndex).attr('id', 'horizontal');
+                    layerIndex = tmpLayerIndex;
+
+                    canvas = $('#horizontal').get(0);
+                    canvas.width = firstCanvas.width();
+                    canvas.height = firstCanvas.height();
+                    ctx = canvas.getContext("2d");
+
+                    ctx.moveTo(0, canvas.height / 2);
+                    ctx.lineTo(canvas.width, canvas.height / 2);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#000';
+                    ctx.stroke();
+                } else {
+                    $('#vertical').hide();
+                    $('#horizontal').show();
+                }
+            }
+            clickSymetry++;
+        });
 
 
         draw(this);
@@ -474,11 +495,6 @@
                 ctx.beginPath();
 
                 switch (selectedTool) {
-                    case 'pen':
-                        ctx.globalCompositeOperation = 'source-over';
-                        ctx.fillRect(pos.x, pos.y, weight, weight);
-                        line = [];
-                        break;
                     case 'line':
                         ctx.globalCompositeOperation = 'source-over';
                         ctx.lineJoin = "round";
