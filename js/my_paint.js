@@ -336,8 +336,7 @@
                     width: firstCanvas.width(),
                     height: firstCanvas.height()
                 });
-                this.width = firstCanvas.width;
-                this.height = firstCanvas.height;
+
                 layers.push($('#layer' + layerIndex).get(0));
                 // Cursor style
                 $('canvas').hover(function () {
@@ -377,17 +376,12 @@
         // Add Layer
         $('#paint-add-layer').on('click', function () {
             if(layerIndex < 8) {
-                console.log(firstCanvas.width);
-                console.log(firstCanvas.height);
                 new CanvasLayer();
                 currentLayer = layers[layers.length - 1];
                 $('#paint-add-layer').before('<a class="btn-floating btn-large waves-effect waves-light red paint-layer-button"' +
                     ' id="layer' + layerIndex + '" title="layer' + layerIndex + '"><i class="material-icons">' +
                     '<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/>' +
                     '<path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/></svg></i></a>');
-                $('#laya').css({
-                    'margin-right': '10px'
-                });
 
                 $('.paint-layer-button').css({
                     'margin-right': '10px'
@@ -402,17 +396,23 @@
                 $('.paint-layer-button').on('click', function(){
                     var button = $(this).attr('id');
                     setActiveLayer('#' + button);
+
+                    canvas = layers[$(this).index()];
+                    ctx = canvas.getContext("2d");
+                    draw($('#' + button));
                 });
                 canvas = layers[layerIndex];
+
+                // New context
+                canvas.width = firstCanvas.width();
+                canvas.height = firstCanvas.height();
+
                 ctx = canvas.getContext("2d");
                 draw($('#layer' + layerIndex));
-                $('canvas').width = $(this).width();
-                $('canvas').height = $(this).height();
             } else {
                 alert('Too many layers !');
             }
         });
-
 
         // Adds color to set the active layer on button
         function setActiveLayer($id){
